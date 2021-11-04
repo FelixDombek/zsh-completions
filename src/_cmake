@@ -161,19 +161,10 @@ _cmake_targets() {
   if [ -f $1/Makefile ]
   then
     # `make help` doesn't work for Makefiles in general, but for CMake generated Makefiles it does.
-    i=1
-    for target in $(make -f $1/Makefile help | \grep -e "\.\.\." | sed "s/\.\.\. //" | sed "s/ (the default.*//") ; do
-      targets[$i]=$target
-      (( i = $i + 1 ))
-    done
+    targets=($(make -f $1/Makefile help | \grep -e "\.\.\." | sed "s/\.\.\. //" | sed "s/ (the default.*//"))
   elif [ -f $1/build.ninja ]
   then
-    # `ninja help` doesn't seem to be the list of targets we're interested in
-    i=1
-    for target in $(ninja -C $1 -t targets all 2&>/dev/null | awk -F: '{print $1}') ; do
-      targets[$i]="$target"
-      (( i++ ))
-    done
+    targets=($(ninja help 2&>/dev/null | grep -v -e \/ -e \\. | cut -d: -f1))
   fi
   _describe 'build targets' targets
 }
